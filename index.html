@@ -92,8 +92,8 @@ class Node {
     // draw ellipse border (debug)
     ctx.save();
     ctx.beginPath();
-    ctx.ellipse(this.x, this.y, this.ellipseRX, this.ellipseRY, 0, 0, Math.PI * 2);
-    ctx.lineWidth = 2;
+    //ctx.ellipse(this.x, this.y, this.ellipseRX, this.ellipseRY, 0, 0, Math.PI * 2);
+    ctx.lineWidth = 0;
     ctx.strokeStyle = 'rgba(255,0,0,0.6)';
     ctx.stroke();
     ctx.restore();
@@ -102,16 +102,23 @@ class Node {
   }
 }
 
-// images and links
+// image and link arrays
 const imageURLs = [
   'https://d3hk6w1rfu80ox.cloudfront.net/media/uploads/listings/1L5jmoQxotgo.png',
   'https://aes2.org/wp-content/uploads/2023/04/AES-Logo-R-768x341.png.webp',
-  'https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png'
+  'https://collegeaim.org/wp-content/uploads/2021/09/syracuse.png',
+  'https://db-ent.com/wp-content/uploads/2025/01/png_soundskrit.png',
+  'https://storage.googleapis.com/crowdnews-media-library/066fab5c-b377-49e1-a086-a64175c7ab75.png',
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Apple_Music_logo.svg/1024px-Apple_Music_logo.svg.png'
 ];
+
 const linkURLs = [
-  'https://example.com/1',
-  'https://example.com/2',
-  'https://example.com/3'
+  'https://anishg2000.wixsite.com/portfolio/post/frostverb-plug-in-gui',
+  'https://anishg2000.wixsite.com/portfolio/post/aes-hackathon-judging',
+  'https://anishg2000.wixsite.com/portfolio/post/zen-rage-university-union-concert',
+  'https://anishg2000.wixsite.com/portfolio/post/soundskrit-firefly-prototype-microphone-testing',
+  'https://anishg2000.wixsite.com/portfolio/post/moises-ai-integration-workshop',
+  'https://anishg2000.wixsite.com/portfolio/post/icon-intuitiveness-study'
 ];
 
 // create nodes with random starting positions
