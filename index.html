@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Cluster Playground — Ellipse Borders (Fixed)</title>
+<title>Cluster Playground — Wix Ready</title>
 <style>
   html, body {
     margin: 0;
@@ -24,274 +24,212 @@
 <canvas id="playground"></canvas>
 
 <script>
-const canvas = document.getElementById('playground');
-const ctx = canvas.getContext('2d', { alpha: true });
+window.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('playground');
+  const ctx = canvas.getContext('2d', { alpha: true });
 
-function resize() {
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = innerWidth * dpr;
-  canvas.height = innerHeight * dpr;
-  ctx.scale(dpr, dpr);
-}
-window.addEventListener('resize', resize);
-resize();
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = innerWidth * dpr;
+    canvas.height = innerHeight * dpr;
+    ctx.setTransform(1,0,0,1,0,0); // reset
+    ctx.scale(dpr, dpr);
+  }
+  window.addEventListener('resize', resize);
+  resize();
 
-class Node {
-  constructor(src, x, y, radius = 60) {
-    this.img = new Image();
-    this.img.src = src;
-    this.x = x;
-    this.y = y;
-    this.vx = 0;
-    this.vy = 0;
-    this.radius = radius;
-    this.dragging = false;
-    this.loaded = false;
+  class Node {
+    constructor(src, x, y, radius = 60, linkURL = null) {
+      this.img = new Image();
+      this.img.src = src;
+      this.x = x;
+      this.y = y;
+      this.vx = 0;
+      this.vy = 0;
+      this.radius = radius;
+      this.dragging = false;
+      this.loaded = false;
+      this.linkURL = linkURL;
 
-    this.img.onload = () => {
-      this.loaded = true;
+      this.img.onload = () => {
+        this.loaded = true;
+        const circleMax = this.radius * 2;
+        const visualFitFactor = 0.88;
+        const maxSize = circleMax * visualFitFactor;
+        const aspect = this.img.width / this.img.height;
+        if (aspect >= 1) {
+          this.drawWidth = maxSize;
+          this.drawHeight = maxSize / aspect;
+        } else {
+          this.drawHeight = maxSize;
+          this.drawWidth = maxSize * aspect;
+        }
+        const ellipsePadding = 1.1;
+        this.ellipseRX = (this.drawWidth / 2) * ellipsePadding;
+        this.ellipseRY = (this.drawHeight / 2) * ellipsePadding;
+        this.updateRect();
+      };
+    }
 
-      const circleMax = this.radius * 2;
-      const visualFitFactor = 0.88;
-      const maxSize = circleMax * visualFitFactor;
+    updateRect() {
+      this.left = this.x - this.drawWidth / 2;
+      this.right = this.x + this.drawWidth / 2;
+      this.top = this.y - this.drawHeight / 2;
+      this.bottom = this.y + this.drawHeight / 2;
+    }
 
-      const aspect = this.img.width / this.img.height;
-      if (aspect >= 1) {
-        this.drawWidth = maxSize;
-        this.drawHeight = maxSize / aspect;
-      } else {
-        this.drawHeight = maxSize;
-        this.drawWidth = maxSize * aspect;
-      }
-
-      const ellipsePadding = 1.1;
-      this.ellipseRX = (this.drawWidth / 2) * ellipsePadding;
-      this.ellipseRY = (this.drawHeight / 2) * ellipsePadding;
-
+    draw() {
+      if (!this.loaded) return;
+      // draw image
+      ctx.drawImage(
+        this.img,
+        this.x - this.drawWidth / 2,
+        this.y - this.drawHeight / 2,
+        this.drawWidth,
+        this.drawHeight
+      );
       this.updateRect();
-    };
-  }
-
-  updateRect() {
-    this.left = this.x - this.drawWidth / 2;
-    this.right = this.x + this.drawWidth / 2;
-    this.top = this.y - this.drawHeight / 2;
-    this.bottom = this.y + this.drawHeight / 2;
-  }
-
-  draw() {
-    if (!this.loaded) return;
-
-    // visible ellipse border (debug)
-    ctx.save();
-    ctx.beginPath();
-    //ctx.ellipse(this.x, this.y, this.ellipseRX, this.ellipseRY, 0, 0, Math.PI * 2);
-    ctx.lineWidth = 0; // change to positive value and uncomment above line to debug image sizing
-    ctx.strokeStyle = 'rgba(255, 0, 0, 0.6)';
-    ctx.stroke();
-    ctx.restore();
-
-    // draw image
-    ctx.drawImage(
-      this.img,
-      this.x - this.drawWidth / 2,
-      this.y - this.drawHeight / 2,
-      this.drawWidth,
-      this.drawHeight
-    );
-
-    this.updateRect();
-  }
-}
-
-// array of image URLs
-const imageURLs = [
-  'https://d3hk6w1rfu80ox.cloudfront.net/media/uploads/listings/1L5jmoQxotgo.png',
-  
-  'https://aes2.org/wp-content/uploads/2023/04/AES-Logo-R-768x341.png.webp',
-  
-  'https://collegeaim.org/wp-content/uploads/2021/09/syracuse.png',
-  
-  'https://db-ent.com/wp-content/uploads/2025/01/png_soundskrit.png',
-  
-  'https://storage.googleapis.com/crowdnews-media-library/066fab5c-b377-49e1-a086-a64175c7ab75.png',
-  'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Apple_Music_logo.svg/1024px-Apple_Music_logo.svg.png',
-  
-  '',
-];
-  
-const linkURLs = [
-  'https://anishg2000.wixsite.com/portfolio/post/frostverb-plug-in-gui',
-  'https://anishg2000.wixsite.com/portfolio/post/aes-hackathon-judging',
-  'https://anishg2000.wixsite.com/portfolio/post/zen-rage-university-union-concert',
-  'https://anishg2000.wixsite.com/portfolio/post/soundskrit-firefly-prototype-microphone-testing',
-  'https://anishg2000.wixsite.com/portfolio/post/moises-ai-integration-workshop',
-  'https://anishg2000.wixsite.com/portfolio/post/icon-intuitiveness-study',
-  '',
-];
-
-// create nodes automatically
-const nodes = imageURLs.map((url, i) => {
-  const startX = innerWidth * 0.5 + (Math.random() - 0.5) * 100;
-  const startY = innerHeight * 0.5 + (Math.random() - 0.5) * 100;
-  const node = new Node(url, startX, startY, 80);
-  node.linkURL = linkURLs[i]; // attach link to the node
-  return node;
-});
-
-let draggingNode = null;
-let offsetX = 0;
-let offsetY = 0;
-
-canvas.addEventListener('pointerdown', e => {
-  const rect = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-
-  for (let node of [...nodes].reverse()) {
-    if (!node.loaded) continue;
-    if (mx > node.left && mx < node.right && my > node.top && my < node.bottom) {
-      draggingNode = node;
-      offsetX = mx - node.x;
-      offsetY = my - node.y;
-      node.dragging = true;
-      canvas.style.cursor = 'grabbing';
-      nodes.splice(nodes.indexOf(node), 1);
-      nodes.push(node);
-      break;
     }
   }
-});
 
-let pointerDownPos = { x: 0, y: 0 };
+  const imageURLs = [
+    'https://d3hk6w1rfu80ox.cloudfront.net/media/uploads/listings/1L5jmoQxotgo.png',
+    'https://aes2.org/wp-content/uploads/2023/04/AES-Logo-R-768x341.png.webp',
+    'https://collegeaim.org/wp-content/uploads/2021/09/syracuse.png',
+    'https://db-ent.com/wp-content/uploads/2025/01/png_soundskrit.png',
+    'https://storage.googleapis.com/crowdnews-media-library/066fab5c-b377-49e1-a086-a64175c7ab75.png',
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Apple_Music_logo.svg/1024px-Apple_Music_logo.svg.png',
+  ];
 
-// pointer down
-canvas.addEventListener('pointerdown', e => {
-  const rect = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-  pointerDownPos = { x: mx, y: my };
+  const linkURLs = [
+    'https://anishg2000.wixsite.com/portfolio/post/frostverb-plug-in-gui',
+    'https://anishg2000.wixsite.com/portfolio/post/aes-hackathon-judging',
+    'https://anishg2000.wixsite.com/portfolio/post/zen-rage-university-union-concert',
+    'https://anishg2000.wixsite.com/portfolio/post/soundskrit-firefly-prototype-microphone-testing',
+    'https://anishg2000.wixsite.com/portfolio/post/moises-ai-integration-workshop',
+    'https://anishg2000.wixsite.com/portfolio/post/icon-intuitiveness-study',
+  ];
 
-  // check topmost node first
-  for (let node of [...nodes].reverse()) {
-    if (!node.loaded) continue;
-    if (mx > node.left && mx < node.right && my > node.top && my < node.bottom) {
-      draggingNode = node;
-      offsetX = mx - node.x;
-      offsetY = my - node.y;
-      node.dragging = true;
-      canvas.style.cursor = 'grabbing';
-      // bring node to front
-      nodes.splice(nodes.indexOf(node), 1);
-      nodes.push(node);
-      break;
-    }
-  }
-});
+  const nodes = imageURLs.map((url, i) => {
+    const startX = innerWidth/2 + (Math.random()-0.5)*200;
+    const startY = innerHeight/2 + (Math.random()-0.5)*200;
+    return new Node(url, startX, startY, 80, linkURLs[i]);
+  });
 
-// pointer up
-window.addEventListener('pointerup', e => {
-  if (draggingNode) {
+  let draggingNode = null;
+  let offsetX = 0, offsetY = 0;
+  let pointerDownPos = {x:0, y:0};
+
+  canvas.addEventListener('pointerdown', e => {
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
+    pointerDownPos = { x: mx, y: my };
 
-    // calculate movement distance
-    const dx = mx - pointerDownPos.x;
-    const dy = my - pointerDownPos.y;
-    const distance = Math.hypot(dx, dy);
+    for (let node of [...nodes].reverse()) {
+      if (!node.loaded) continue;
+      if (mx > node.left && mx < node.right && my > node.top && my < node.bottom) {
+        draggingNode = node;
+        offsetX = mx - node.x;
+        offsetY = my - node.y;
+        node.dragging = true;
+        canvas.style.cursor = 'grabbing';
+        nodes.splice(nodes.indexOf(node), 1);
+        nodes.push(node);
+        break;
+      }
+    }
+  });
 
-    // if small movement → treat as click
-    if (distance < 5 && draggingNode.linkURL) {
-      window.open(draggingNode.linkURL, '_blank'); // open link in new tab
+  window.addEventListener('pointerup', e => {
+    if (draggingNode) {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      const dx = mx - pointerDownPos.x;
+      const dy = my - pointerDownPos.y;
+      const distance = Math.hypot(dx, dy);
+
+      if (distance < 5 && draggingNode.linkURL) {
+        window.open(draggingNode.linkURL,'_blank');
+      }
+
+      draggingNode.dragging = false;
+    }
+    draggingNode = null;
+    canvas.style.cursor = 'grab';
+  });
+
+  window.addEventListener('pointermove', e => {
+    if (!draggingNode) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    draggingNode.x = mx - offsetX;
+    draggingNode.y = my - offsetY;
+  });
+
+  function animate() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const centerX = innerWidth/2;
+    const centerY = innerHeight/2;
+
+    for (let i=0; i<nodes.length; i++){
+      const node = nodes[i];
+
+      if (!node.dragging){
+        const dx = centerX - node.x;
+        const dy = centerY - node.y;
+        node.vx += dx*0.0025;
+        node.vy += dy*0.0025;
+      }
+
+      const repulsionStrength = 0.6;
+      const pushFactor = 0.5;
+
+      for (let j=i+1; j<nodes.length; j++){
+        const other = nodes[j];
+        if (!node.loaded || !other.loaded) continue;
+
+        const dx = other.x - node.x;
+        const dy = other.y - node.y;
+        const rx = (node.ellipseRX + other.ellipseRX) * 1.2;
+        const ry = (node.ellipseRY + other.ellipseRY) * 1.2;
+
+        const nx = dx / rx;
+        const ny = dy / ry;
+        const dist = Math.hypot(nx, ny);
+
+        if (dist < 1 && dist>0){
+          const overlap = (1-dist)*repulsionStrength;
+          const pushX = nx*overlap*pushFactor;
+          const pushY = ny*overlap*pushFactor;
+          if (!node.dragging){
+            node.x -= pushX;
+            node.y -= pushY;
+          }
+          if (!other.dragging){
+            other.x += pushX;
+            other.y += pushY;
+          }
+        }
+      }
+
+      node.vx *= 0.92;
+      node.vy *= 0.92;
+      if (!node.dragging){
+        node.x += node.vx;
+        node.y += node.vy;
+      }
+
+      node.draw();
     }
 
-    // stop dragging
-    draggingNode.dragging = false;
+    requestAnimationFrame(animate);
   }
-  draggingNode = null;
-  canvas.style.cursor = 'grab';
+
+  animate();
 });
-
-// pointer move
-window.addEventListener('pointermove', e => {
-  if (!draggingNode) return;
-  const rect = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-  draggingNode.x = mx - offsetX;
-  draggingNode.y = my - offsetY;
-});
-
-// --- Main animation loop ---
-function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  const centerX = canvas.width / (2 * (window.devicePixelRatio || 1));
-  const centerY = canvas.height / (2 * (window.devicePixelRatio || 1));
-
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i];
-
-    // attraction to center
-    if (!node.dragging) {
-      const dx = centerX - node.x;
-      const dy = centerY - node.y;
-      node.vx += dx * 0.0025;
-      node.vy += dy * 0.0025;
-    }
-
-    // circular repulsion (scaled correctly)
-const repulsionStrength = 0.6;
-const pushFactor = 0.5;
-
-for (let j = i + 1; j < nodes.length; j++) {
-  const other = nodes[j];
-  if (!node.loaded || !other.loaded) continue;
-
-  const dx = other.x - node.x;
-  const dy = other.y - node.y;
-
-  const rx = (node.ellipseRX + other.ellipseRX)*1.4;
-  const ry = (node.ellipseRY + other.ellipseRY)*1.4;
-
-  const nx = dx / rx;
-  const ny = dy / ry;
-  const dist = Math.hypot(nx, ny);
-
-  if (dist < 1 && dist > 0) {
-    const overlap = (1 - dist) * repulsionStrength;
-
-    const pushX = nx * overlap * rx;
-    const pushY = ny * overlap * ry;
-
-    if (!node.dragging) {
-      node.x -= pushX * pushFactor;
-      node.y -= pushY * pushFactor;
-    }
-    if (!other.dragging) {
-      other.x += pushX * pushFactor;
-      other.y += pushY * pushFactor;
-    }
-  }
-}
-
-
-
-    node.vx *= 0.92;
-    node.vy *= 0.92;
-    if (!node.dragging) {
-      node.x += node.vx;
-      node.y += node.vy;
-    }
-
-    node.draw();
-  }
-
-  requestAnimationFrame(animate);
-}
-
-animate();
 </script>
 </body>
 </html>
